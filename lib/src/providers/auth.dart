@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
+import 'package:locations/src/providers/connection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sql_conn/sql_conn.dart';
 
@@ -89,23 +90,18 @@ class Auth with ChangeNotifier {
     } */
   }
 
-  Future<bool> tryAutoLogin() async {
+  Future<bool> tryAutoLogin(ctx) async {
     bool a;
     final prefs = await SharedPreferences.getInstance();
-    print(prefs.getString('userData'));
-    print('try');
+    await Connection().setData();
+    await Connection().reConnect();
     if (!prefs.containsKey('userData')) {
       a = false;
-      // return false;
     } else {
       Map<String, dynamic> map =
           json.decode(prefs.getString('userData').toString());
 
       print(map);
-      // List<dynamic> data = map[0];
-
-      /* final extractedUserData = json
-        .decode(prefs.getString('userData').toString()) as Map<String, Object>; */
       final expiryDate = DateTime.parse(map['expiryDate'].toString());
 
       if (expiryDate.isBefore(DateTime.now())) {

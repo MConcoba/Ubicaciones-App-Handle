@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:locations/src/providers/connection.dart';
 import 'package:locations/src/screens/home.dart';
 import 'package:locations/src/screens/login.dart';
+import 'package:locations/src/screens/new_location_screen.dart';
 import 'package:locations/src/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 import './src/providers/auth.dart';
-import './src/providers/setting.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  await dotenv
+    ..load(fileName: ".env");
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -18,7 +24,7 @@ class MyApp extends StatelessWidget {
           value: Auth(),
         ),
         ChangeNotifierProvider.value(
-          value: Setting(),
+          value: Connection(),
         ),
       ],
       child: Consumer<Auth>(
@@ -31,7 +37,7 @@ class MyApp extends StatelessWidget {
           home: auth.isAuth
               ? const Home()
               : FutureBuilder(
-                  future: auth.tryAutoLogin(),
+                  future: auth.tryAutoLogin(ctx),
                   builder: (ctx, authResult) =>
                       authResult.connectionState == ConnectionState.waiting
                           ? SplashScreen()
@@ -48,6 +54,8 @@ class MyApp extends StatelessWidget {
           routes: {
             Home.routeName: (ctx) => const Home(),
             AuthScreen.routeName: (ctx) => AuthScreen(),
+            LocScreen.routeName: (ctx) => LocScreen(),
+            // LocationScreen.routeName: (ctx) => LocationScreen(),
           },
         ),
       ),
@@ -73,7 +81,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-
   void _incrementCounter() {
     setState(() {
       _counter++;

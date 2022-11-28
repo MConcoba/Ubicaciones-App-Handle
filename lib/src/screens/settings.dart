@@ -1,32 +1,25 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:localstorage/localstorage.dart';
+import 'package:locations/src/providers/connection.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sql_conn/sql_conn.dart';
 
-import '../providers/setting.dart';
-
-class ConnectionDB extends StatefulWidget {
-  const ConnectionDB({Key? key}) : super(key: key);
+class Settings extends StatefulWidget {
+  const Settings({Key? key}) : super(key: key);
 
   @override
-  State<ConnectionDB> createState() => _ConnectionDBState();
+  State<Settings> createState() => _SettingsState();
 }
 
-class _ConnectionDBState extends State<ConnectionDB> {
-  final LocalStorage storage = new LocalStorage('todo_app');
-
-  final serverController = TextEditingController()
-    ..text = "qsus.quickshipping.com";
-  final dataController = TextEditingController()..text = "QuickShippingBAK";
-  final passwordOldController = TextEditingController()
-    ..text = "accesoRAPIDOsqlALL*";
-  final passwordNewController = TextEditingController()
-    ..text = "accesoRAPIDOsqlALL*";
+class _SettingsState extends State<Settings> {
+  final serverController = TextEditingController();
+  final dataController = TextEditingController();
+  final userController = TextEditingController();
+  final passwordNewController = TextEditingController();
   final passwordController = TextEditingController();
 
   var _isLoading = false;
@@ -35,7 +28,7 @@ class _ConnectionDBState extends State<ConnectionDB> {
   _saveToStorage() async {
     final prefs = await SharedPreferences.getInstance();
 
-    /* prefs.getString("serve").toString() != 'null'
+    prefs.getString("serve").toString() != 'null'
         ? serverController.text = prefs.getString("serve").toString()
         : serverController.text = '';
 
@@ -43,19 +36,59 @@ class _ConnectionDBState extends State<ConnectionDB> {
         ? dataController.text = prefs.getString("db").toString()
         : dataController.text = '';
 
-    prefs.getString("pass").toString() != 'null'
-        ? passwordOldController.text = prefs.getString("pass").toString()
-        : passwordOldController.text = '';
+    prefs.getString("user").toString() != 'null'
+        ? userController.text = prefs.getString("user").toString()
+        : userController.text = '';
 
     prefs.getString("pass").toString() != 'null'
         ? passwordNewController.text = prefs.getString("pass").toString()
-        : passwordNewController.text = ''; */
+        : passwordNewController.text = '';
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('An Error Occurred!'),
+        content: Text(message),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Okay'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Navigator.pop(ctx);
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  showLoaderDialog(BuildContext context) {
+    AlertDialog alert = AlertDialog(
+      content: new Row(
+        children: [
+          CircularProgressIndicator(),
+          Container(
+            margin: EdgeInsets.only(left: 7),
+            child: Text("Connecting..."),
+          ),
+        ],
+      ),
+    );
+    showDialog(
+      // barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   Future<void> connect() async {
     final enteredServer = serverController.text;
     final enteredData = dataController.text;
-    final enteredPassOld = passwordOldController.text;
+    final enteredUser = userController.text;
     final enteredPassNew = passwordNewController.text;
     final enteredPassword = passwordController.text;
 
@@ -75,7 +108,7 @@ class _ConnectionDBState extends State<ConnectionDB> {
     } else {
       if (enteredServer.isEmpty ||
           enteredData.isEmpty ||
-          enteredPassOld.isEmpty ||
+          enteredUser.isEmpty ||
           enteredPassNew.isEmpty) {
         return;
       }
@@ -86,33 +119,18 @@ class _ConnectionDBState extends State<ConnectionDB> {
       });
 
       try {
-        showDialog(
-          context: context,
-          builder: (context) {
-            return const AlertDialog(
-              title: Text(""),
-              content: Text('Conectado...'),
-            );
-          },
-        );
+        bool c = false;
+        var s = await showLoaderDialog(context);
 
-        await SqlConn.connect(
-          ip: enteredServer,
-          port: '1433',
-          databaseName: enteredData,
-          username: 'computo',
-          password: 'accesoRAPIDOsqlALL*',
-        );
-        Provider.of<Setting>(context, listen: false).save(
+        await Connection()
+            .connect(enteredServer, enteredData, enteredUser, enteredPassNew);
+
+        Provider.of<Connection>(context, listen: false).save(
           enteredServer,
           enteredData,
-          'computo',
+          enteredUser,
           enteredPassNew,
         );
-        /* setState(() {
-          _isLoading = false;
-          FocusScope.of(context).unfocus();
-        }); */
 
         showDialog(
           context: context,
@@ -132,18 +150,11 @@ class _ConnectionDBState extends State<ConnectionDB> {
             );
           },
         );
+      } on SocketException catch (e) {
+        print(e.toString());
+        _showErrorDialog(e.toString());
       } catch (e) {
-        print(e);
-        Object as = e;
-        showDialog(
-          context: context,
-          builder: (context) {
-            return const AlertDialog(
-              title: Text('Error'),
-              content: Text('e'),
-            );
-          },
-        );
+        _showErrorDialog(e.toString());
       } finally {
         // Navigator.pop(context);
       }
@@ -185,13 +196,12 @@ class _ConnectionDBState extends State<ConnectionDB> {
                   controller: dataController,
                 ),
                 TextField(
-                  decoration: const InputDecoration(labelText: 'Old Password'),
+                  decoration: const InputDecoration(labelText: 'User'),
                   textInputAction: TextInputAction.next,
-                  controller: passwordOldController,
-                  obscureText: true,
+                  controller: userController,
                 ),
                 TextField(
-                  decoration: const InputDecoration(labelText: 'New Password'),
+                  decoration: const InputDecoration(labelText: 'Password'),
                   controller: passwordNewController,
                   obscureText: true,
                   onSubmitted: (_) => connect(),

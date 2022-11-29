@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:locations/src/screens/connection.dart';
+import 'package:locations/src/screens/new_location_screen.dart';
+import 'package:locations/src/screens/settings.dart';
 import 'package:locations/src/widgets/app_drawer.dart';
 import 'package:provider/provider.dart';
 
@@ -14,13 +15,26 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  void loc(BuildContext ctx) {
+    showDialog(
+      context: ctx,
+      builder: (_) {
+        return AlertDialog(
+          title: Text('Settings'),
+          content: Settings(),
+          //behavior: HitTestBehavior.opaque,
+        );
+      },
+    );
+  }
+
   void connecion(BuildContext ctx) {
     showDialog(
       context: ctx,
       builder: (_) {
         return AlertDialog(
           title: Text('Settings'),
-          content: ConnectionDB(),
+          content: Settings(),
           //behavior: HitTestBehavior.opaque,
         );
       },
@@ -28,8 +42,8 @@ class _HomeState extends State<Home> {
   }
 
   void logout(BuildContext ctx) {
-    // Navigator.of(context).pop();
-    // Navigator.of(context).pushReplacementNamed('/');
+    Navigator.of(context).pop();
+    Navigator.of(context).pushReplacementNamed('/');
     Provider.of<Auth>(context, listen: false).logout();
   }
 
@@ -38,10 +52,9 @@ class _HomeState extends State<Home> {
     final deviceSize = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Your Orders'),
+        title: Text(''),
       ),
       drawer: AppDrawer(),
-
       body: Stack(
         children: <Widget>[
           Container(
@@ -57,55 +70,75 @@ class _HomeState extends State<Home> {
               ),
             ),
           ),
-          SingleChildScrollView(
-            child: Container(
-              height: deviceSize.height,
-              width: deviceSize.width,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Flexible(
-                    flex: deviceSize.width > 600 ? 2 : 1,
-                    child: Text('Home'),
+          Center(
+            child: Material(
+              color: Colors.blue,
+              elevation: 8,
+              borderRadius: BorderRadius.circular(30),
+              clipBehavior: Clip.antiAliasWithSaveLayer,
+              child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(30)),
+                child: FloatingActionButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5)),
+                  splashColor: Colors.black26,
+                  heroTag: 'loc',
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(LocScreen.routeName);
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.warehouse,
+                        size: 120,
+                      ),
+                      Text(
+                        'Location',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    ],
                   ),
-                ],
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+      floatingActionButton: Stack(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(left: 31, top: 110),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: FloatingActionButton(
+                heroTag: 'exit',
+                onPressed: () => logout(context),
+                child: Icon(Icons.exit_to_app),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 31, top: 110),
+            child: Align(
+              alignment: Alignment.topRight,
+              child: FloatingActionButton(
+                heroTag: 'set',
+                onPressed: () => connecion(context),
+                child: Icon(Icons.settings),
               ),
             ),
           ),
         ],
       ),
-      /* floatingActionButton: Stack(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(left: 31, top: 50),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: FloatingActionButton(
-                  onPressed: () => logout(context),
-                  child: Icon(Icons.exit_to_app),
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 31, top: 50),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: FloatingActionButton(
-                  onPressed: () => connecion(context),
-                  child: Icon(Icons.settings),
-                ),
-              ),
-            ),
-          ],
-        ) */
-      //floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-
-      /* floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.settings),
-        onPressed: () => connecion(context),
-      ), */
     );
   }
 }

@@ -33,13 +33,14 @@ class Connection with ChangeNotifier {
       if (await SqlConn.isConnected) {
         log('es coneteado');
         return;
+      } else {
+        await connect(
+          prefs.getString("serve").toString(),
+          prefs.getString("db").toString(),
+          prefs.getString("user").toString(),
+          prefs.getString("pass").toString(),
+        );
       }
-      connect(
-        prefs.getString("serve").toString(),
-        prefs.getString("db").toString(),
-        prefs.getString("user").toString(),
-        prefs.getString("pass").toString(),
-      );
     } catch (error) {
       throw error;
     }
@@ -58,6 +59,26 @@ class Connection with ChangeNotifier {
       // return true;
     } catch (error) {
       log(error.toString());
+      throw error;
+    }
+  }
+
+  Future<void> userConnect(String user) async {
+    try {
+      await reConnect();
+      print('userConnet');
+      var existe = await SqlConn.writeData(
+          "IF OBJECT_ID('tempdb..#Userconect') IS NOT NULL DROP TABLE #Userconect");
+      if (!existe) {
+        var insetUser = await SqlConn.readData(
+            "SELECT * FROM #Userconect WHERE usuario = 'gmerck';");
+        return;
+      }
+      var response =
+          await SqlConn.writeData("SELECT usuario = '$user' into #Userconect;");
+      print(response);
+    } catch (error) {
+      print(error);
       throw error;
     }
   }
@@ -106,8 +127,9 @@ class Connection with ChangeNotifier {
   Future<Map<String, dynamic>> getLocaion(String code) async {
     try {
       // print(code);
-      var response = await SqlConn.readData(
-          "SELECT * from Ubicaciones u WHERE Nombre = '$code'");
+      await reConnect();
+      var response = await SqlConn.readData("exec pmm_UbicacionValida '$code'");
+      print(response);
       final responseData = json.decode(response);
       if (response.length < 3) {
         throw HttpException('Location not found');
@@ -115,12 +137,29 @@ class Connection with ChangeNotifier {
       Map<String, dynamic> object = responseData[0] as Map<String, dynamic>;
       return object;
     } catch (error) {
-      // print(error);
+      print(error);
+      throw HttpException(error.toString());
+      // throw error;
+    }
+  }
+
+  Future<void> postLocation(String package, String location) async {
+    try {
+      // print(code);
+      await reConnect();
+      final prefs = await SharedPreferences.getInstance();
+      final user = prefs.getString('userName');
+      final device = prefs.getString('device');
+      var response = await SqlConn.writeData(
+          "exec pmm_AgregarBultoUbicacion $package, $location, '$user', '$device', '1'");
+      print("agregar $response");
+    } catch (error) {
+      print(error);
       throw error;
     }
   }
 
-  Future<Map<String, dynamic>> postLocation(String code, String wr) async {
+  Future<Map<String, dynamic>> postLsocation(String code, String wr) async {
     try {
       // print(code);
       var response = await SqlConn.readData(

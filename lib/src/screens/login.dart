@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:locations/src/screens/connection.dart';
+import 'package:locations/src/screens/settings.dart';
 import 'package:provider/provider.dart';
 
 import '../models/http_exception.dart';
@@ -16,7 +16,7 @@ class AuthScreen extends StatelessWidget {
       builder: (_) {
         return AlertDialog(
           title: Text('Settings'),
-          content: ConnectionDB(),
+          content: Settings(),
           //behavior: HitTestBehavior.opaque,
         );
       },

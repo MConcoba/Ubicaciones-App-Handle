@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/widgets.dart';
 import 'package:locations/src/providers/connection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,6 +18,7 @@ class Auth with ChangeNotifier {
   );
   late String _userId = '';
   late Timer _authTimer = Timer(const Duration(seconds: 0), logout);
+  late String _user = '';
 
   bool get isAuth {
     print(_token);
@@ -52,6 +54,7 @@ class Auth with ChangeNotifier {
         }
         _token = responseData[0]['Clave'].toString();
         _userId = responseData[0]['UsuarioId'].toString();
+        _user = responseData[0]['Login'].toString();
         _expiryDate = DateTime.now().add(
           Duration(
             seconds: int.parse('50000'),
@@ -66,9 +69,11 @@ class Auth with ChangeNotifier {
           'token': _token,
           'userId': _userId,
           'expiryDate': _expiryDate.toIso8601String(),
+          'user': _user,
         },
       );
       prefs.setString('userData', userData);
+      prefs.setString('userName', _user);
       print(prefs.getString('userData'));
     } catch (error) {
       print(error);
@@ -82,26 +87,25 @@ class Auth with ChangeNotifier {
 
   Future<void> login(String email, String password) async {
     return _authenticate(email, password, 'verifyPassword');
-    /*  print(email);
-    var res = await SqlConn.readData(
-        "SELECT * FROM  Usuarios u WHERE [Login] = '$email'");
-    if (res.length > 0) {
-      print('object');
-    } */
   }
 
   Future<bool> tryAutoLogin(ctx) async {
     bool a;
     final prefs = await SharedPreferences.getInstance();
+    // logout();
     await Connection().setData();
     await Connection().reConnect();
+
+    informationDevice();
     if (!prefs.containsKey('userData')) {
       a = false;
+      // return false;
     } else {
       Map<String, dynamic> map =
           json.decode(prefs.getString('userData').toString());
 
       print(map);
+
       final expiryDate = DateTime.parse(map['expiryDate'].toString());
 
       if (expiryDate.isBefore(DateTime.now())) {
@@ -109,7 +113,9 @@ class Auth with ChangeNotifier {
       }
       _token = map['token'].toString();
       _userId = map['userId'].toString();
+      _user = map['user'].toString();
       _expiryDate = expiryDate;
+
       notifyListeners();
       _autoLogout();
       a = true;
@@ -135,11 +141,22 @@ class Auth with ChangeNotifier {
     notifyListeners();
   }
 
-  void _autoLogout() {
+  void _autoLogout() async {
     if (_authTimer != null) {
       _authTimer.cancel();
     }
     final timeToExpiry = _expiryDate.difference(DateTime.now()).inSeconds;
     _authTimer = Timer(Duration(seconds: timeToExpiry), logout);
+    await Connection().userConnect(_user);
+  }
+
+  void informationDevice() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    final prefs = await SharedPreferences.getInstance();
+
+    prefs.setString('device', androidInfo.id);
+
+    // log('Running on ${androidInfo.data}');
   }
 }

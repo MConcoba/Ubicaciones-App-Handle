@@ -121,19 +121,7 @@ class _AuthCardState extends State<AuthCard> {
         _authData['email'].toString(),
         _authData['password'].toString(),
       );
-      /* if (_authMode == AuthMode.Login) {
-        // Log user in
-        await Provider.of<Auth>(context, listen: false).login(
-          _authData['email'].toString(),
-          _authData['password'].toString(),
-        );
-      } else {
-        // Sign user up
-        await Provider.of<Auth>(context, listen: false).signup(
-          _authData['email'].toString(),
-          _authData['password'].toString(),
-        );
-      } */
+      Navigator.of(context).pushReplacementNamed('/home');
     } on HttpException catch (error) {
       var errorMessage = 'Authentication failed';
       if (error.toString().contains('EMAIL_EXISTS')) {
@@ -149,13 +137,19 @@ class _AuthCardState extends State<AuthCard> {
       }
       _showErrorDialog(errorMessage);
     } catch (error) {
-      const errorMessage =
-          'Could not authenticate you. Please try again later.';
+      var errorMessage = 'Authentication failed';
+      if (error
+          .toString()
+          .contains('El usuario proporcionado esta deshabilitado')) {
+        errorMessage = 'This user is not active';
+      } else if (error.toString().contains('Usuario ingresado no existe')) {
+        errorMessage = 'Could not find a user.';
+      } else if (error.toString().contains('Clave Incorrecta')) {
+        errorMessage = 'Invalid password.';
+      }
+
       _showErrorDialog(errorMessage);
     }
-
-    // _showErrorDialog(errorMessage);
-
     setState(() {
       _isLoading = false;
     });
@@ -197,11 +191,11 @@ class _AuthCardState extends State<AuthCard> {
                   decoration: InputDecoration(labelText: 'Password'),
                   obscureText: true,
                   controller: _passwordController,
-                  validator: (value) {
+                  /* validator: (value) {
                     if (value!.isEmpty || value.length < 5) {
                       return 'Password is too short!';
                     }
-                  },
+                  }, */
                   onSaved: (value) {
                     _authData['password'] = value!;
                   },

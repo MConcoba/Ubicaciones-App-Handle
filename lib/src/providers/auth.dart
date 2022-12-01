@@ -3,11 +3,10 @@ import 'dart:convert';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:locations/src/providers/connection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sql_conn/sql_conn.dart';
-
-import '../models/http_exception.dart';
 
 class Auth with ChangeNotifier {
   late String _token = '';
@@ -43,18 +42,13 @@ class Auth with ChangeNotifier {
       String email, String password, String urlSegment) async {
     try {
       print(email);
-      var response = await SqlConn.readData(
-          "SELECT * FROM  Usuarios u WHERE [Login] = '$email'");
+      var response = await SqlConn.writeData(
+          "EXEC  pmm_UsuarioValido '$email', '$password';");
       print(response);
-      if (response.length > 0) {
-        final responseData = json.decode(response);
-        if (responseData[0]['error'] != null) {
-          print(responseData[0]['Clave']);
-          throw HttpException(responseData['error']['message']);
-        }
-        _token = responseData[0]['Clave'].toString();
-        _userId = responseData[0]['UsuarioId'].toString();
-        _user = responseData[0]['Login'].toString();
+      if (response) {
+        _token = dotenv.get('TOKEN_APP');
+        _userId = '0';
+        _user = email;
         _expiryDate = DateTime.now().add(
           Duration(
             seconds: int.parse('50000'),

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:locations/src/screens/new_location_screen.dart';
-import 'package:locations/src/screens/settings.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import './new_location_screen.dart';
+import './settings.dart';
 import '../providers/auth.dart';
 
 class Home extends StatefulWidget {

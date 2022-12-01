@@ -138,8 +138,7 @@ class Connection with ChangeNotifier {
       return object;
     } catch (error) {
       print(error);
-      throw HttpException(error.toString());
-      // throw error;
+      throw HttpException('Location not found');
     }
   }
 
@@ -154,14 +153,15 @@ class Connection with ChangeNotifier {
           "exec pmm_AgregarBultoUbicacion $package, $location, '$user', '$device', '1'");
       print("agregar $response");
     } catch (error) {
-      print(error);
-      throw error;
+      // print(error);
+      throw HttpException('Package not found');
     }
   }
 
   Future<Map<String, dynamic>> postLsocation(String code, String wr) async {
     try {
       // print(code);
+      await reConnect();
       var response = await SqlConn.readData(
           "SELECT * from Ubicaciones u WHERE Nombre = '$code'");
       final responseData = json.decode(response);

@@ -131,6 +131,7 @@ class _LocScreenState extends State<LocScreen>
 
   void _showErrorDialo(String message) {
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('An Error Occurred!'),
@@ -150,9 +151,11 @@ class _LocScreenState extends State<LocScreen>
   }
 
   Future<bool> _submit(String? code) async {
+    String bulto = code!.substring(2);
     try {
       if (!exLocation) {
-        Map<String, dynamic> a = await Connection().getLocaion(code!);
+        randon();
+        Map<String, dynamic> a = await Connection().getLocaion(code);
         print('pantalla  ${a.length}');
         setState(() {
           exLocation = true;
@@ -160,39 +163,45 @@ class _LocScreenState extends State<LocScreen>
           nameLocation = a['Nombre'].toString();
         });
       } else {
-        validationPackages(code);
-        // await Connection().postLocation(code.toString(), idLocation);
+        await Connection().postLocation(bulto, idLocation);
+        validationPackages(bulto, true);
       }
       return true;
     } on HttpException catch (error) {
-      await alertError(error.toString());
+      // await alertError(error.toString());
+      if (exLocation) {
+        validationPackages(bulto, false);
+      } else {
+        await alertError(error.toString());
+      }
       return false;
     } catch (error) {
-      await alertError(error.toString());
+      if (exLocation) {
+        validationPackages(bulto, false);
+      } else {
+        await alertError(error.toString());
+      }
       return false;
     }
   }
 
-  Future<String> validationPackages(String? code) async {
+  Future<void> validationPackages(String? code, bool valid) async {
     var a = Icon(Icons.check_box);
-    String bulto = code!.substring(2);
-    String dato;
+    // = code!.substring(2);
     final newPgk = Package(
       location: nameLocation,
-      wr: bulto,
+      wr: code!,
       date: DateTime.now(),
       color: cone,
       icono: a,
-      descrition: 'UBICADO :|: $nameLocation BULTO $bulto',
+      descrition: 'UBICADO :|: $nameLocation BULTO $code',
     );
-    if (code.length < 16) {
+    if (!valid) {
       newPgk.icono = Icon(Icons.error, color: Colors.red);
-      newPgk.descrition = 'BULTO INVALIDO :|: $bulto';
+      newPgk.descrition = 'BULTO INVALIDO :|: $code';
       await alertError(newPgk.descrition);
-      dato = '';
     } else {
       randon();
-      dato = bulto;
       newPgk.icono = Icon(
         Icons.check_box,
         color: cone,
@@ -203,7 +212,7 @@ class _LocScreenState extends State<LocScreen>
       currentPgk = newPgk.descrition;
       _paquetes.add(newPgk);
     });
-    return dato;
+    // return dato;
   }
 
   Future showAlert(BuildContext context) async {
@@ -282,7 +291,6 @@ class _LocScreenState extends State<LocScreen>
       backgroundColor: cone,
       appBar: AppBar(
         title: const Text('New Location'),
-        backgroundColor: cone == Colors.white ? Colors.blue : cone,
       ),
       body: Stack(
         children: <Widget>[
@@ -423,9 +431,7 @@ class _LocScreenState extends State<LocScreen>
 
     codeFormats.add(CodeFormat.EAN_13);
     Map<String, dynamic> properties = {
-      ...CodeFormatUtils.getAsPropertiesComplement(codeFormats),
-      'DEC_CODABAR_START_STOP_TRANSMIT': true,
-      'DEC_EAN13_CHECK_DIGIT_TRANSMIT': '7',
+      // ...CodeFormatUtils.getAsPropertiesComplement(codeFormats),
       'NTF_BAD_READ_ENABLED': true,
       'NTF_GOOD_READ_ENABLED': true,
       'TRIG_CONTROL_MODE': true,

@@ -20,14 +20,10 @@ class Auth with ChangeNotifier {
   late String _user = '';
 
   bool get isAuth {
-    print(_token);
-    print(token != null);
-    // notifyListeners();
     return token != null;
   }
 
   String? get token {
-    print(_token);
     if (_token != '') {
       return _token;
     }
@@ -41,10 +37,8 @@ class Auth with ChangeNotifier {
   Future<void> _authenticate(
       String email, String password, String urlSegment) async {
     try {
-      print(email);
       var response = await SqlConn.writeData(
           "EXEC  pmm_UsuarioValido '$email', '$password';");
-      print(response);
       if (response) {
         _token = dotenv.get('TOKEN_APP');
         _userId = '0';
@@ -68,9 +62,7 @@ class Auth with ChangeNotifier {
       );
       prefs.setString('userData', userData);
       prefs.setString('userName', _user);
-      print(prefs.getString('userData'));
     } catch (error) {
-      print(error);
       throw error;
     }
   }
@@ -98,8 +90,6 @@ class Auth with ChangeNotifier {
       Map<String, dynamic> map =
           json.decode(prefs.getString('userData').toString());
 
-      print(map);
-
       final expiryDate = DateTime.parse(map['expiryDate'].toString());
 
       if (expiryDate.isBefore(DateTime.now())) {
@@ -114,24 +104,20 @@ class Auth with ChangeNotifier {
       _autoLogout();
       a = true;
     }
-    print(a);
     return a;
   }
 
   Future<void> logout() async {
-    print('log');
     _token = '';
     _userId = '';
     _expiryDate = DateTime.now();
-    print(_authTimer.toString());
     if (_authTimer != null) {
       _authTimer.cancel();
       _authTimer;
     }
     final prefs = await SharedPreferences.getInstance();
     prefs.remove('userData');
-    prefs.clear();
-    //  print(prefs.containsKey('userData'));
+    // prefs.clear();
     notifyListeners();
   }
 
@@ -148,9 +134,6 @@ class Auth with ChangeNotifier {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     final prefs = await SharedPreferences.getInstance();
-
     prefs.setString('device', androidInfo.id);
-
-    // log('Running on ${androidInfo.data}');
   }
 }

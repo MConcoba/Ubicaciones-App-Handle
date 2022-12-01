@@ -28,7 +28,7 @@ class _HomeState extends State<Home> {
     final prefs = await SharedPreferences.getInstance();
     device = prefs.getString('device')!;
     setState(() {
-      print('Device $device');
+      // print('Device $device');
     });
   }
 

@@ -14,9 +14,6 @@ class Connection with ChangeNotifier {
   Future<void> setData() async {
     final prefs = await SharedPreferences.getInstance();
     bool ifr = await IsFirstRun.isFirstRun();
-
-    print('se');
-    print(ifr);
     notifyListeners();
     if (ifr) {
       prefs.setString('setting', dotenv.get("DB_QSSV_HOST"));
@@ -31,7 +28,6 @@ class Connection with ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       if (await SqlConn.isConnected) {
-        log('es coneteado');
         return;
       } else {
         await connect(
@@ -66,7 +62,6 @@ class Connection with ChangeNotifier {
   Future<void> userConnect(String user) async {
     try {
       await reConnect();
-      print('userConnet');
       var existe = await SqlConn.writeData(
           "IF OBJECT_ID('tempdb..#Userconect') IS NOT NULL DROP TABLE #Userconect");
       if (!existe) {
@@ -76,9 +71,7 @@ class Connection with ChangeNotifier {
       }
       var response =
           await SqlConn.writeData("SELECT usuario = '$user' into #Userconect;");
-      print(response);
     } catch (error) {
-      print(error);
       throw error;
     }
   }
@@ -105,9 +98,7 @@ class Connection with ChangeNotifier {
       prefs.setString('db', db);
       prefs.setString('user', user);
       prefs.setString('pass', pass);
-
       String? token = prefs.getString('setting');
-      print(token);
     } catch (error) {
       throw error;
     }
@@ -126,10 +117,8 @@ class Connection with ChangeNotifier {
 
   Future<Map<String, dynamic>> getLocaion(String code) async {
     try {
-      // print(code);
       await reConnect();
       var response = await SqlConn.readData("exec pmm_UbicacionValida '$code'");
-      print(response);
       final responseData = json.decode(response);
       if (response.length < 3) {
         throw HttpException('Location not found');
@@ -137,30 +126,25 @@ class Connection with ChangeNotifier {
       Map<String, dynamic> object = responseData[0] as Map<String, dynamic>;
       return object;
     } catch (error) {
-      print(error);
       throw HttpException('Location not found');
     }
   }
 
   Future<void> postLocation(String package, String location) async {
     try {
-      // print(code);
       await reConnect();
       final prefs = await SharedPreferences.getInstance();
       final user = prefs.getString('userName');
       final device = prefs.getString('device');
       var response = await SqlConn.writeData(
           "exec pmm_AgregarBultoUbicacion $package, $location, '$user', '$device', '1'");
-      print("agregar $response");
     } catch (error) {
-      // print(error);
       throw HttpException('Package not found');
     }
   }
 
   Future<Map<String, dynamic>> postLsocation(String code, String wr) async {
     try {
-      // print(code);
       await reConnect();
       var response = await SqlConn.readData(
           "SELECT * from Ubicaciones u WHERE Nombre = '$code'");
@@ -171,7 +155,6 @@ class Connection with ChangeNotifier {
       Map<String, dynamic> object = responseData[0] as Map<String, dynamic>;
       return object;
     } catch (error) {
-      // print(error);
       throw error;
     }
   }

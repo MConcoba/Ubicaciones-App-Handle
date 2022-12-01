@@ -3,10 +3,10 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:locations/src/providers/connection.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../providers/connection.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -77,7 +77,6 @@ class _SettingsState extends State<Settings> {
       ),
     );
     showDialog(
-      // barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
         return alert;
@@ -99,7 +98,6 @@ class _SettingsState extends State<Settings> {
         setState(() {
           _isVerify = true;
           FocusScope.of(context).unfocus();
-          //return;
         });
       } else {
         print('here');
@@ -114,7 +112,6 @@ class _SettingsState extends State<Settings> {
       }
 
       setState(() {
-        // _isLoading = true;
         FocusScope.of(context).unfocus();
       });
 
@@ -155,12 +152,8 @@ class _SettingsState extends State<Settings> {
         _showErrorDialog(e.toString());
       } catch (e) {
         _showErrorDialog(e.toString());
-      } finally {
-        // Navigator.pop(context);
       }
     }
-
-    //Navigator.of(context).pop();
   }
 
   @override
@@ -227,21 +220,22 @@ class _SettingsState extends State<Settings> {
                               Theme.of(context).primaryTextTheme.button?.color,
                         )),
                     Container(
-                        margin: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                        child: RaisedButton(
-                          onPressed: (() {
-                            Navigator.of(context).pop();
-                          }),
-                          child: Text(' Cancel'),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20.0, vertical: 10.0),
-                          color: Theme.of(context).secondaryHeaderColor,
-                          textColor:
-                              Theme.of(context).primaryTextTheme.button?.color,
-                        )),
+                      margin: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                      child: RaisedButton(
+                        onPressed: (() {
+                          Navigator.of(context).pop();
+                        }),
+                        child: Text(' Cancel'),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20.0, vertical: 10.0),
+                        color: Theme.of(context).secondaryHeaderColor,
+                        textColor:
+                            Theme.of(context).primaryTextTheme.button?.color,
+                      ),
+                    ),
                   ],
                 ),
               )

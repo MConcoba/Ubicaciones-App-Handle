@@ -7,9 +7,10 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:honeywell_scanner/honeywell_scanner.dart';
-import 'package:locations/src/models/package.dart';
-import 'package:locations/src/providers/connection.dart';
-import 'package:locations/src/widgets/wr_lists.dart';
+
+import '../models/package.dart';
+import '../providers/connection.dart';
+import '../widgets/wr_lists.dart';
 
 class LocScreen extends StatefulWidget {
   const LocScreen({Key? key}) : super(key: key);
@@ -22,7 +23,6 @@ class LocScreen extends StatefulWidget {
 class _LocScreenState extends State<LocScreen>
     with WidgetsBindingObserver
     implements ScannerCallback {
-  final locatedController = TextEditingController();
   HoneywellScanner honeywellScanner = HoneywellScanner();
 
   String? errorMessage;
@@ -47,42 +47,37 @@ class _LocScreenState extends State<LocScreen>
   bool isDeviceSupported = false;
   bool scannerEnabled = false;
 
-  final serverController = TextEditingController();
-  ScrollController listScrollController = ScrollController();
-
   final List<Package> _paquetes = [];
 
   @override
   void initState() {
     super.initState();
-    //setLocated();
     WidgetsBinding.instance.addObserver(this);
     honeywellScanner.scannerCallback = this;
-    // honeywellScanner.onScannerDecodeCallback = onDecoded;
-    // honeywellScanner.onScannerErrorCallback = onError;
-    init();
-    configS();
+    startScanner();
+    configSong();
   }
 
-  Future<void> configS() async {
+  Future<void> startScanner() async {
+    start();
+    updateScanProperties();
+    isDeviceSupported = await honeywellScanner.isSupported();
+    if (mounted) setState(() {});
+  }
+
+  Future<void> configSong() async {
     Future.delayed(Duration.zero, () async {
-      ByteData bytes =
-          await rootBundle.load(audioasset); //load audio from assets
+      ByteData bytes = await rootBundle.load(audioasset);
       audiobytes =
           bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes);
-      //convert ByteData to Uint8List
 
       player.onDurationChanged.listen((Duration d) {
-        //get the duration of audio
         maxduration = d.inMilliseconds;
         setState(() {});
       });
 
       player.onAudioPositionChanged.listen((Duration p) {
-        currentpos =
-            p.inMilliseconds; //get the current position of playing audio
-
-        //generating the duration label
+        currentpos = p.inMilliseconds;
         int shours = Duration(milliseconds: currentpos).inHours;
         int sminutes = Duration(milliseconds: currentpos).inMinutes;
         int sseconds = Duration(milliseconds: currentpos).inSeconds;
@@ -92,44 +87,30 @@ class _LocScreenState extends State<LocScreen>
         int rseconds = sseconds - (sminutes * 60 + shours * 60 * 60);
 
         currentpostlabel = "$rhours:$rminutes:$rseconds";
-
-        setState(() {
-          //refresh the UI
-        });
       });
     });
   }
 
-  Future<void> init() async {
-    start();
-    updateScanProperties();
-    isDeviceSupported = await honeywellScanner.isSupported();
-    if (mounted) setState(() {});
-  }
-
   @override
   void onDecoded(ScannedData? scannedData) async {
-    print(scannedData?.code.toString());
     bool res = await _submit(scannedData?.code.toString());
     if (res) {
     } else {
       setState(() {
         cone = Colors.red;
       });
-      badRead();
     }
   }
 
   @override
   void onError(Exception error) {
-    print(error);
     setState(() {
       cone = Colors.red;
       errorMessage = error.toString();
     });
   }
 
-  void _showErrorDialo(String message) {
+  void _showErrorDialog(String message) {
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -154,9 +135,8 @@ class _LocScreenState extends State<LocScreen>
     String bulto = code!.substring(2);
     try {
       if (!exLocation) {
-        randon();
+        randonColor();
         Map<String, dynamic> a = await Connection().getLocaion(code);
-        print('pantalla  ${a.length}');
         setState(() {
           exLocation = true;
           idLocation = a['Ubicacionid'].toString();
@@ -168,7 +148,6 @@ class _LocScreenState extends State<LocScreen>
       }
       return true;
     } on HttpException catch (error) {
-      // await alertError(error.toString());
       if (exLocation) {
         validationPackages(bulto, false);
       } else {
@@ -187,7 +166,6 @@ class _LocScreenState extends State<LocScreen>
 
   Future<void> validationPackages(String? code, bool valid) async {
     var a = Icon(Icons.check_box);
-    // = code!.substring(2);
     final newPgk = Package(
       location: nameLocation,
       wr: code!,
@@ -201,7 +179,7 @@ class _LocScreenState extends State<LocScreen>
       newPgk.descrition = 'BULTO INVALIDO :|: $code';
       await alertError(newPgk.descrition);
     } else {
-      randon();
+      randonColor();
       newPgk.icono = Icon(
         Icons.check_box,
         color: cone,
@@ -212,56 +190,9 @@ class _LocScreenState extends State<LocScreen>
       currentPgk = newPgk.descrition;
       _paquetes.add(newPgk);
     });
-    // return dato;
   }
 
-  Future showAlert(BuildContext context) async {
-    await Future.delayed(Duration(seconds: 0));
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: new Text('Welcome To Our App :) .'),
-          content: TextField(
-            decoration: const InputDecoration(labelText: 'Located'),
-            autofocus: true,
-            controller: locatedController,
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: new Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void setLocated() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Location'),
-        content: TextField(
-          decoration: const InputDecoration(labelText: 'Located'),
-          controller: locatedController,
-        ),
-        actions: <Widget>[
-          FlatButton(
-            child: Text('Okay'),
-            onPressed: () {
-              Navigator.of(ctx).pop();
-            },
-          )
-        ],
-      ),
-    );
-  }
-
-  void randon() {
+  void randonColor() {
     var list = ['green', 'yellow', 'pink', 'cyan', 'brown', 'purple'];
     var current = cone;
     do {
@@ -417,8 +348,7 @@ class _LocScreenState extends State<LocScreen>
     int result = await player.playBytes(audiobytes);
     if (result == 1) {
       await honeywellScanner.stopScanner();
-      _showErrorDialo(e);
-      print("audio is playing.");
+      _showErrorDialog(e);
     } else {
       print("Error while playing audio.");
     }
@@ -426,8 +356,6 @@ class _LocScreenState extends State<LocScreen>
 
   void updateScanProperties() {
     List<CodeFormat> codeFormats = [];
-
-    ///codeFormats.add(CodeFormat.AZTEC);
 
     codeFormats.add(CodeFormat.EAN_13);
     Map<String, dynamic> properties = {
@@ -444,13 +372,7 @@ class _LocScreenState extends State<LocScreen>
   }
 
   @override
-  void badRead() async {
-    print('here');
-  }
-
-  @override
   void dispose() {
-    print('go');
     honeywellScanner.stopScanner();
     super.dispose();
   }

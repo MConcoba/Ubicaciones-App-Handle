@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -92,15 +92,13 @@ class _SettingsState extends State<Settings> {
     final enteredPassword = passwordController.text;
 
     if (!_isVerify) {
-      if (enteredPassword == 'a') {
-        log('sd');
+      if (enteredPassword == dotenv.get('PASS_VER')) {
         _saveToStorage();
         setState(() {
           _isVerify = true;
           FocusScope.of(context).unfocus();
         });
       } else {
-        print('here');
         return;
       }
     } else {

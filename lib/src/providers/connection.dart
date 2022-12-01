@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -16,11 +15,11 @@ class Connection with ChangeNotifier {
     bool ifr = await IsFirstRun.isFirstRun();
     notifyListeners();
     if (ifr) {
-      prefs.setString('setting', dotenv.get("DB_QSSV_HOST"));
-      prefs.setString('serve', dotenv.get("DB_QSSV_HOST"));
-      prefs.setString('db', dotenv.get("DB_QSSV_DATABASE"));
-      prefs.setString('user', dotenv.get("DB_QSSV_USERNAME"));
-      prefs.setString('pass', dotenv.get("DB_QSSV_PASSWORD"));
+      prefs.setString('setting', dotenv.get("DB_QS_HOST"));
+      prefs.setString('serve', dotenv.get("DB_QS_HOST"));
+      prefs.setString('db', dotenv.get("DB_QS_DATABASE"));
+      prefs.setString('user', dotenv.get("DB_QS_USERNAME"));
+      prefs.setString('pass', dotenv.get("DB_QS_PASSWORD"));
     }
   }
 
@@ -47,14 +46,13 @@ class Connection with ChangeNotifier {
     try {
       await SqlConn.connect(
         ip: serve,
-        port: dotenv.get("DB_QSSV_PORT"),
+        port: dotenv.get("DB_QS_PORT"),
         databaseName: db,
         username: user,
         password: password,
       );
       // return true;
     } catch (error) {
-      log(error.toString());
       throw error;
     }
   }

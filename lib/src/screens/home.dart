@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:locations/src/screens/new_location_screen.dart';
 import 'package:locations/src/screens/settings.dart';
-import 'package:locations/src/widgets/app_drawer.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/auth.dart';
 
@@ -15,17 +16,21 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  void loc(BuildContext ctx) {
-    showDialog(
-      context: ctx,
-      builder: (_) {
-        return AlertDialog(
-          title: Text('Settings'),
-          content: Settings(),
-          //behavior: HitTestBehavior.opaque,
-        );
-      },
-    );
+  String version = 'VP:${dotenv.get("VERSION_APP")}';
+  String device = '';
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+  Future<void> getData() async {
+    final prefs = await SharedPreferences.getInstance();
+    device = prefs.getString('device')!;
+    setState(() {
+      print('Device $device');
+    });
   }
 
   void connecion(BuildContext ctx) {
@@ -42,19 +47,18 @@ class _HomeState extends State<Home> {
   }
 
   void logout(BuildContext ctx) {
-    Navigator.of(context).pop();
-    Navigator.of(context).pushReplacementNamed('/');
     Provider.of<Auth>(context, listen: false).logout();
+    Navigator.of(context).pushReplacementNamed('/auth');
   }
 
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
+      /* appBar: AppBar(
         title: Text(''),
       ),
-      drawer: AppDrawer(),
+      drawer: AppDrawer(), */
       body: Stack(
         children: <Widget>[
           Container(
@@ -110,13 +114,20 @@ class _HomeState extends State<Home> {
                 ),
               ),
             ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 5),
+              child: Text('$version   Device: $device'),
+            ),
           )
         ],
       ),
       floatingActionButton: Stack(
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.only(left: 31, top: 110),
+            padding: EdgeInsets.only(left: 31, top: 80),
             child: Align(
               alignment: Alignment.topLeft,
               child: FloatingActionButton(
@@ -127,7 +138,7 @@ class _HomeState extends State<Home> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(left: 31, top: 110),
+            padding: EdgeInsets.only(left: 31, top: 80),
             child: Align(
               alignment: Alignment.topRight,
               child: FloatingActionButton(

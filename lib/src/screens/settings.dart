@@ -24,6 +24,12 @@ class _SettingsState extends State<Settings> {
 
   var _isLoading = false;
   var _isVerify = false;
+  var _passwordVisible = false;
+
+  @override
+  void initState() {
+    _passwordVisible = false;
+  }
 
   _saveToStorage() async {
     final prefs = await SharedPreferences.getInstance();
@@ -97,6 +103,7 @@ class _SettingsState extends State<Settings> {
         setState(() {
           _isVerify = true;
           FocusScope.of(context).unfocus();
+          _passwordVisible = false;
         });
       } else {
         return;
@@ -132,7 +139,7 @@ class _SettingsState extends State<Settings> {
           builder: (context) {
             return AlertDialog(
               title: Text('Status'),
-              content: Text('Connextion'),
+              content: Text('Successful connection...'),
               actions: <Widget>[
                 FlatButton(
                   child: Text('Okay'),
@@ -170,8 +177,23 @@ class _SettingsState extends State<Settings> {
             ] else ...[
               if (!_isVerify) ...[
                 TextField(
-                  decoration: const InputDecoration(labelText: 'Password'),
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _passwordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _passwordVisible = !_passwordVisible;
+                        });
+                      },
+                    ),
+                  ),
                   controller: passwordController,
+                  obscureText: !_passwordVisible,
                   onSubmitted: (_) => connect(),
                 ),
               ] else ...[
@@ -192,9 +214,23 @@ class _SettingsState extends State<Settings> {
                   controller: userController,
                 ),
                 TextField(
-                  decoration: const InputDecoration(labelText: 'Password'),
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _passwordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _passwordVisible = !_passwordVisible;
+                        });
+                      },
+                    ),
+                  ),
                   controller: passwordNewController,
-                  obscureText: true,
+                  obscureText: !_passwordVisible,
                   onSubmitted: (_) => connect(),
                 ),
               ],

@@ -34,8 +34,7 @@ class Auth with ChangeNotifier {
     return _userId;
   }
 
-  Future<void> _authenticate(
-      String email, String password, String urlSegment) async {
+  Future<void> _authenticate(String email, String password) async {
     try {
       var response = await SqlConn.writeData(
           "EXEC  pmm_UsuarioValido '$email', '$password';");
@@ -68,11 +67,11 @@ class Auth with ChangeNotifier {
   }
 
   Future<void> signup(String email, String password) async {
-    return _authenticate(email, password, 'signupNewUser');
+    return _authenticate(email, password);
   }
 
   Future<void> login(String email, String password) async {
-    return _authenticate(email, password, 'verifyPassword');
+    return _authenticate(email, password);
   }
 
   Future<bool> tryAutoLogin(ctx) async {

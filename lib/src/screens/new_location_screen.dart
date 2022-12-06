@@ -357,7 +357,7 @@ class _LocScreenState extends State<LocScreen>
   void updateScanProperties() {
     List<CodeFormat> codeFormats = [];
 
-    codeFormats.add(CodeFormat.EAN_13);
+    // codeFormats.add(CodeFormat.EAN_13);
     Map<String, dynamic> properties = {
       // ...CodeFormatUtils.getAsPropertiesComplement(codeFormats),
       'NTF_BAD_READ_ENABLED': true,

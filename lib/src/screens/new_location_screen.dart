@@ -28,6 +28,7 @@ class _LocScreenState extends State<LocScreen>
   String? errorMessage;
 
   bool exLocation = false;
+  bool firstLocation = false;
   String idLocation = '';
   String nameLocation = '';
   String currentPgk = '';
@@ -51,6 +52,8 @@ class _LocScreenState extends State<LocScreen>
 
   @override
   void initState() {
+    exLocation = false;
+    firstLocation = false;
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     honeywellScanner.scannerCallback = this;
@@ -132,13 +135,19 @@ class _LocScreenState extends State<LocScreen>
   }
 
   Future<bool> _submit(String? code) async {
-    String bulto = code!.substring(2);
+    print(code!.length);
+    code.length == 10 ? exLocation = false : exLocation = true;
+    String bulto = code.substring(2);
     try {
       if (!exLocation) {
         randonColor();
         Map<String, dynamic> a = await Connection().getLocaion(code);
+        if (firstLocation) {
+          newLocation(a['Nombre'].toString(), true);
+        }
         setState(() {
           exLocation = true;
+          firstLocation = true;
           idLocation = a['Ubicacionid'].toString();
           nameLocation = a['Nombre'].toString();
         });
@@ -190,6 +199,23 @@ class _LocScreenState extends State<LocScreen>
       currentPgk = newPgk.descrition;
       _paquetes.add(newPgk);
     });
+  }
+
+  Future<void> newLocation(String? code, bool valid) async {
+    if (valid) {
+      final newPgk = Package(
+        location: nameLocation,
+        wr: code!,
+        date: DateTime.now(),
+        color: cone,
+        icono: Icon(Icons.house_rounded),
+        descrition: 'NUEVA UBICACION :|: $code',
+      );
+      setState(() {
+        currentPgk = newPgk.descrition;
+        _paquetes.add(newPgk);
+      });
+    }
   }
 
   void randonColor() {
@@ -278,7 +304,7 @@ class _LocScreenState extends State<LocScreen>
               ),
             ),
           ),
-          if (exLocation) ...[
+          if (firstLocation) ...[
             Padding(
               padding: const EdgeInsets.only(top: 130, right: 10, left: 10),
               child: Container(

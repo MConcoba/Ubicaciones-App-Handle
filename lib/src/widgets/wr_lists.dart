@@ -29,10 +29,11 @@ class _PackageListState extends State<PackageList> {
           itemBuilder: (ctx, index) {
             if (listScrollController.hasClients) {
               final position = listScrollController.position.maxScrollExtent;
+              //listScrollController.jumpTo(position)
               listScrollController.animateTo(
                 position,
                 duration: Duration(seconds: 1),
-                curve: Curves.easeOut,
+                curve: Curves.linear,
               );
             }
             return Container(

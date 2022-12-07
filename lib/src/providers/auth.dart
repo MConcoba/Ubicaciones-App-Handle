@@ -36,6 +36,7 @@ class Auth with ChangeNotifier {
 
   Future<void> _authenticate(String email, String password) async {
     try {
+      await Connection().reConnect();
       var response = await SqlConn.writeData(
           "EXEC  pmm_UsuarioValido '$email', '$password';");
       if (response) {
@@ -78,8 +79,8 @@ class Auth with ChangeNotifier {
     bool a;
     final prefs = await SharedPreferences.getInstance();
     // logout();
-    await Connection().setData();
     await Connection().reConnect();
+    await Connection().setData();
 
     informationDevice();
     if (!prefs.containsKey('userData')) {
@@ -126,7 +127,7 @@ class Auth with ChangeNotifier {
     }
     final timeToExpiry = _expiryDate.difference(DateTime.now()).inSeconds;
     _authTimer = Timer(Duration(seconds: timeToExpiry), logout);
-    await Connection().userConnect(_user);
+    //  await Connection().userConnect(_user);
   }
 
   void informationDevice() async {

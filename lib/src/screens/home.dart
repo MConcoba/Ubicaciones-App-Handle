@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:locations/src/providers/connection.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,6 +22,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    Provider.of<Connection>(context, listen: false).startMonitoring();
     getData();
   }
 
@@ -125,6 +127,21 @@ class _HomeState extends State<Home> {
       ),
       floatingActionButton: Stack(
         children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(left: 31, top: 50),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Consumer<Connection>(
+                builder: ((context, value, child) {
+                  if (value.isOnline) {
+                    return Icon(Icons.wifi);
+                  } else {
+                    return Icon(Icons.wifi_off);
+                  }
+                }),
+              ),
+            ),
+          ),
           Padding(
             padding: EdgeInsets.only(left: 31, top: 80),
             child: Align(

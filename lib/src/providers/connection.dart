@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:is_first_run/is_first_run.dart';
@@ -10,6 +13,57 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sql_conn/sql_conn.dart';
 
 class Connection with ChangeNotifier {
+  Connectivity _conect = new Connectivity();
+  late bool _isOnline = false;
+
+  bool get isOnline => _isOnline;
+
+  startMonitoring() async {
+    await initConnectivity();
+    _conect.onConnectivityChanged.listen((event) async {
+      if (event == ConnectivityResult.none) {
+        _isOnline = false;
+        notifyListeners();
+      } else {
+        await _updateConnectionStatus().then((bool isConnected) {
+          _isOnline = isConnected;
+          notifyListeners();
+        });
+      }
+    });
+  }
+
+  FutureOr<void> initConnectivity() async {
+    try {
+      var status = await _conect.checkConnectivity();
+      if (status == ConnectivityResult.none) {
+        _isOnline = false;
+        notifyListeners();
+      } else {
+        _isOnline = true;
+        notifyListeners();
+      }
+    } on PlatformException catch (e) {
+      print('Platform Exception $e');
+    }
+  }
+
+  Future<bool> _updateConnectionStatus() async {
+    bool isConnected;
+    try {
+      final List<InternetAddress> result =
+          await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        isConnected = true;
+      } else {
+        isConnected = false;
+      }
+    } on SocketException catch (_) {
+      isConnected = false;
+    }
+    return isConnected;
+  }
+
   Future<void> setData() async {
     final prefs = await SharedPreferences.getInstance();
     bool ifr = await IsFirstRun.isFirstRun();
@@ -27,6 +81,7 @@ class Connection with ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       if (await SqlConn.isConnected) {
+        print("is Conect");
         return;
       } else {
         await connect(
@@ -35,7 +90,9 @@ class Connection with ChangeNotifier {
           prefs.getString("user").toString(),
           prefs.getString("pass").toString(),
         );
+        print("new Conect");
       }
+      await userConnect(prefs.getString("user").toString());
     } catch (error) {
       throw error;
     }
@@ -57,9 +114,17 @@ class Connection with ChangeNotifier {
     }
   }
 
+  Future<void> disconnect() async {
+    try {
+      await SqlConn.disconnect();
+    } catch (error) {
+      throw error;
+    }
+  }
+
   Future<void> userConnect(String user) async {
     try {
-      await reConnect();
+      //await reConnect();
       var existe = await SqlConn.writeData(
           "IF OBJECT_ID('tempdb..#Userconect') IS NOT NULL DROP TABLE #Userconect");
       if (!existe) {
@@ -116,15 +181,25 @@ class Connection with ChangeNotifier {
   Future<Map<String, dynamic>> getLocaion(String code) async {
     try {
       await reConnect();
-      var response = await SqlConn.readData("exec pmm_UbicacionValida '$code'");
-      final responseData = json.decode(response);
-      if (response.length < 3) {
+      if (_conect.toString().contains(('none'))) {
+        //return;
+        throw HttpException('No internet connection');
+      } else {
+        var response =
+            await SqlConn.readData("exec pmm_UbicacionValida '$code'");
+        final responseData = json.decode(response);
+        if (response.length < 3) {
+          throw HttpException('Location not found');
+        }
+        Map<String, dynamic> object = responseData[0] as Map<String, dynamic>;
+        return object;
+      }
+    } catch (error) {
+      if (error.toString().contains(('connection'))) {
+        throw error;
+      } else {
         throw HttpException('Location not found');
       }
-      Map<String, dynamic> object = responseData[0] as Map<String, dynamic>;
-      return object;
-    } catch (error) {
-      throw HttpException('Location not found');
     }
   }
 

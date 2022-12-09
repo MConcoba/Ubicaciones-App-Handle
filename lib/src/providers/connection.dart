@@ -84,6 +84,7 @@ class Connection with ChangeNotifier {
         print("is Conect");
         return;
       } else {
+        await Connection().setData();
         await connect(
           prefs.getString("serve").toString(),
           prefs.getString("db").toString(),
@@ -92,7 +93,7 @@ class Connection with ChangeNotifier {
         );
         print("new Conect");
       }
-      await userConnect(prefs.getString("user").toString());
+      // await userConnect(prefs.getString("user").toString());
     } catch (error) {
       throw error;
     }

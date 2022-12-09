@@ -80,7 +80,6 @@ class Auth with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     // logout();
     await Connection().reConnect();
-    await Connection().setData();
 
     informationDevice();
     if (!prefs.containsKey('userData')) {
@@ -127,7 +126,7 @@ class Auth with ChangeNotifier {
     }
     final timeToExpiry = _expiryDate.difference(DateTime.now()).inSeconds;
     _authTimer = Timer(Duration(seconds: timeToExpiry), logout);
-    //  await Connection().userConnect(_user);
+    await Connection().userConnect(_user);
   }
 
   void informationDevice() async {

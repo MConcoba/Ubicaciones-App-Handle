@@ -7,6 +7,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:honeywell_scanner/honeywell_scanner.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
 import '../models/package.dart';
 import '../providers/connection.dart';
@@ -249,7 +250,203 @@ class _LocScreenState extends State<LocScreen>
       appBar: AppBar(
         title: const Text('New Location'),
       ),
-      body: Stack(
+      body: Column(
+        children: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Container(
+                width: 90.w,
+                height: 15.h,
+                //color: Colors.amber,
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  elevation: 5,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        RichText(
+                          text: TextSpan(
+                            text: 'Location:   ',
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 15,
+                              // fontWeight: FontWeight.bold,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: nameLocation,
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        RichText(
+                          text: TextSpan(
+                            text: '\nID:   ',
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 15,
+                              // fontWeight: FontWeight.bold,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: idLocation,
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (firstLocation) ...[
+            Padding(
+              padding: const EdgeInsets.all(10),
+              //child: Container(
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                elevation: 8.0,
+                color: cone,
+                child: Container(
+                  width: 90.w,
+                  height: 10.h,
+                  //padding: EdgeInsets.only(top: 25),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          textAlign: TextAlign.center,
+                          currentPgk,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 0.23.dp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 0),
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: PackageList(
+                  transactions: _paquetes,
+                ),
+              ),
+            ),
+          ]
+        ],
+      ),
+      /*  body: Stack(
+          children: <Widget>[
+            Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: FractionallySizedBox(
+                  widthFactor: 0.9,
+                  heightFactor: 0.15,
+                  child: Container(
+                    //padding: EdgeInsets.only(top: 20),
+                    //color: Colors.amber,
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      elevation: 5,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            RichText(
+                              text: TextSpan(
+                                text: 'Location:   ',
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 15,
+                                  // fontWeight: FontWeight.bold,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: nameLocation,
+                                    style: TextStyle(
+                                      color: Colors.green,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            RichText(
+                              text: TextSpan(
+                                text: '\nID:   ',
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 15,
+                                  // fontWeight: FontWeight.bold,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: idLocation,
+                                    style: TextStyle(
+                                      color: Colors.green,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            if (!firstLocation) ...[
+              /* Align(
+                alignment: Alignment.center,
+                child: */
+              FractionallySizedBox(
+                widthFactor: 0.9,
+                heightFactor: 0.1,
+                child: Container(
+                  color: Colors.amber,
+                ),
+              ),
+              // )
+            ]
+          ],
+        ) */
+
+      /* Stack(
         children: <Widget>[
           Container(
             padding: EdgeInsets.all(20.0),
@@ -349,7 +546,7 @@ class _LocScreenState extends State<LocScreen>
             ),
           ]
         ],
-      ),
+      ), */
     );
   }
 

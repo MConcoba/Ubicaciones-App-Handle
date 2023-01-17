@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
 import '../models/package.dart';
 
@@ -21,9 +22,11 @@ class _PackageListState extends State<PackageList> {
     }
 
     return Container(
-      height: 320,
-      padding: EdgeInsets.all(10),
+      width: 90.w,
+      height: 52.h,
+      //padding: EdgeInsets.all(10),
       child: Card(
+        elevation: 5,
         child: ListView.builder(
           controller: listScrollController,
           itemBuilder: (ctx, index) {

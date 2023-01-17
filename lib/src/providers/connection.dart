@@ -22,10 +22,11 @@ class Connection with ChangeNotifier {
     await initConnectivity();
     _conect.onConnectivityChanged.listen((event) async {
       if (event == ConnectivityResult.none) {
+        await SqlConn.disconnect();
         _isOnline = false;
         notifyListeners();
       } else {
-        await _updateConnectionStatus().then((bool isConnected) {
+        await _updateConnectionStatus().then((bool isConnected) async {
           _isOnline = isConnected;
           notifyListeners();
         });
@@ -80,18 +81,23 @@ class Connection with ChangeNotifier {
   Future<void> reConnect() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      if (await SqlConn.isConnected) {
+      if (SqlConn.isConnected) {
         print("is Conect");
         return;
       } else {
-        await Connection().setData();
-        await connect(
-          prefs.getString("serve").toString(),
-          prefs.getString("db").toString(),
-          prefs.getString("user").toString(),
-          prefs.getString("pass").toString(),
-        );
-        print("new Conect");
+        await this.startMonitoring();
+        if (_isOnline) {
+          await Connection().setData();
+          await connect(
+            prefs.getString("serve").toString(),
+            prefs.getString("db").toString(),
+            prefs.getString("user").toString(),
+            prefs.getString("pass").toString(),
+          );
+          print("new Conect");
+        } else {
+          print('not conexion network');
+        }
       }
       // await userConnect(prefs.getString("user").toString());
     } catch (error) {
@@ -125,7 +131,7 @@ class Connection with ChangeNotifier {
 
   Future<void> userConnect(String user) async {
     try {
-      //await reConnect();
+      await reConnect();
       var existe = await SqlConn.writeData(
           "IF OBJECT_ID('tempdb..#Userconect') IS NOT NULL DROP TABLE #Userconect");
       if (!existe) {
@@ -181,7 +187,9 @@ class Connection with ChangeNotifier {
 
   Future<Map<String, dynamic>> getLocaion(String code) async {
     try {
-      await reConnect();
+      final prefs = await SharedPreferences.getInstance();
+      final user = prefs.getString('userName');
+      await userConnect(user.toString());
       if (_conect.toString().contains(('none'))) {
         //return;
         throw HttpException('No internet connection');
@@ -199,21 +207,25 @@ class Connection with ChangeNotifier {
       if (error.toString().contains(('connection'))) {
         throw error;
       } else {
-        throw HttpException('Location not found');
+        throw HttpException(error.toString());
       }
     }
   }
 
   Future<void> postLocation(String package, String location) async {
     try {
-      await reConnect();
+      //await reConnect();
+
       final prefs = await SharedPreferences.getInstance();
+
       final user = prefs.getString('userName');
+      await userConnect(user.toString());
+
       final device = prefs.getString('device');
       var response = await SqlConn.writeData(
           "exec pmm_AgregarBultoUbicacion $package, $location, '$user', '$device', '1'");
     } catch (error) {
-      throw HttpException('Package not found');
+      throw HttpException(error.toString());
     }
   }
 

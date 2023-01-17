@@ -141,10 +141,10 @@ class _LocScreenState extends State<LocScreen>
     String bulto = code.substring(2);
     try {
       if (!exLocation) {
-        randonColor();
         Map<String, dynamic> a = await Connection().getLocaion(code);
+        randonColor();
         if (firstLocation) {
-          newLocation(a['Nombre'].toString(), true);
+          newLocation(a['Nombre'].toString(), true, '');
         }
         setState(() {
           exLocation = true;
@@ -154,27 +154,30 @@ class _LocScreenState extends State<LocScreen>
         });
       } else {
         await Connection().postLocation(bulto, idLocation);
-        validationPackages(bulto, true);
+        validationPackages(bulto, true, '');
       }
       return true;
     } on HttpException catch (error) {
       if (exLocation) {
-        validationPackages(bulto, false);
+        validationPackages(bulto, false, error.toString());
       } else {
-        await alertError(error.toString());
+        newLocation(code, false, error.toString());
       }
       return false;
     } catch (error) {
       if (exLocation) {
-        validationPackages(bulto, false);
+        validationPackages(bulto, false, error.toString());
       } else {
-        await alertError(error.toString());
+        newLocation(code, false, error.toString());
+
+        // await alertError(error.toString());
       }
       return false;
     }
   }
 
-  Future<void> validationPackages(String? code, bool valid) async {
+  Future<void> validationPackages(
+      String? code, bool valid, String? error) async {
     var a = Icon(Icons.check_box);
     final newPgk = Package(
       location: nameLocation,
@@ -186,7 +189,7 @@ class _LocScreenState extends State<LocScreen>
     );
     if (!valid) {
       newPgk.icono = Icon(Icons.error, color: Colors.red);
-      newPgk.descrition = 'BULTO INVALIDO :|: $code';
+      newPgk.descrition = '$error :|: $code';
       await alertError(newPgk.descrition);
     } else {
       randonColor();
@@ -202,21 +205,33 @@ class _LocScreenState extends State<LocScreen>
     });
   }
 
-  Future<void> newLocation(String? code, bool valid) async {
-    if (valid) {
-      final newPgk = Package(
-        location: nameLocation,
-        wr: code!,
-        date: DateTime.now(),
+  Future<void> newLocation(String? code, bool valid, String? error) async {
+    var ico = Icon(Icons.house_rounded);
+    final newPgk = Package(
+      location: nameLocation,
+      wr: code!,
+      date: DateTime.now(),
+      color: cone,
+      icono: ico,
+      descrition: 'NUEVA UBICACION :|: $code',
+    );
+
+    if (!valid) {
+      newPgk.icono = Icon(Icons.error, color: Colors.red);
+      newPgk.descrition = '$error :|: $code';
+      await alertError(error.toString());
+    } else {
+      randonColor();
+      newPgk.icono = Icon(
+        Icons.house_rounded,
         color: cone,
-        icono: Icon(Icons.house_rounded),
-        descrition: 'NUEVA UBICACION :|: $code',
       );
-      setState(() {
-        currentPgk = newPgk.descrition;
-        _paquetes.add(newPgk);
-      });
     }
+
+    setState(() {
+      currentPgk = newPgk.descrition;
+      _paquetes.add(newPgk);
+    });
   }
 
   void randonColor() {

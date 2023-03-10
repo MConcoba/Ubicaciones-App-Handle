@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:locations/src/screens/settings.dart';
 import 'package:provider/provider.dart';
 
@@ -9,6 +10,7 @@ enum AuthMode { Signup, Login }
 
 class AuthScreen extends StatelessWidget {
   static const routeName = '/auth';
+  String version = 'VP:${dotenv.get("VERSION_APP")}';
 
   void connecion(BuildContext ctx) {
     showDialog(
@@ -58,6 +60,13 @@ class AuthScreen extends StatelessWidget {
               ),
             ),
           ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 5),
+              child: Text('$version'),
+            ),
+          )
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,

@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:locations/src/providers/connection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sql_conn/sql_conn.dart';
+import 'package:unique_identifier/unique_identifier.dart';
 
 class Auth with ChangeNotifier {
   late String _token = '';
@@ -81,7 +83,8 @@ class Auth with ChangeNotifier {
     // logout();
     await Connection().reConnect();
 
-    informationDevice();
+    //informationDevice();
+    initUniqueIdentifierState();
     if (!prefs.containsKey('userData')) {
       a = false;
       // return false;
@@ -132,7 +135,23 @@ class Auth with ChangeNotifier {
   void informationDevice() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    var androidDeviceInfo = await deviceInfo.androidInfo;
+    print(androidDeviceInfo.isPhysicalDevice);
     final prefs = await SharedPreferences.getInstance();
     prefs.setString('device', androidInfo.id);
+  }
+
+  Future<void> initUniqueIdentifierState() async {
+    String? identifier;
+    try {
+      identifier = await UniqueIdentifier.serial;
+    } on PlatformException {
+      identifier = 'Failed to get Unique Identifier';
+    }
+
+    //if (!mounted) return;
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('device', identifier.toString());
+    print(identifier);
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:locations/src/screens/new_location_screen_eyoyo.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
               Home.routeName: (ctx) => const Home(),
               AuthScreen.routeName: (ctx) => AuthScreen(),
               LocScreen.routeName: (ctx) => LocScreen(),
+              EyoyoScanner.routeName: (ctx) => EyoyoScanner(),
             },
           ),
         ),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:locations/src/providers/connection.dart';
+import 'package:locations/src/screens/new_location_screen_eyoyo.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import './new_location_screen.dart';
 import './settings.dart';
 import '../providers/auth.dart';
 
@@ -93,7 +93,7 @@ class _HomeState extends State<Home> {
                   splashColor: Colors.black26,
                   heroTag: 'loc',
                   onPressed: () {
-                    Navigator.of(context).pushNamed(LocScreen.routeName);
+                    Navigator.of(context).pushNamed(EyoyoScanner.routeName);
                   },
                   child: Column(
                     mainAxisSize: MainAxisSize.min,

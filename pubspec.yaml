@@ -35,7 +35,7 @@ dependencies:
   dart_mssql: ^1.0.1
   sql_conn: ^0.0.3
   localstorage: ^4.0.0+2
-  audioplayers: ^3.0.1
+  audioplayers: ^0.20.1
   flutter_dotenv: ^5.0.2
   is_first_run: ^1.0.0
   device_info_plus: ^8.0.1

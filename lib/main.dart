@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:locations/src/screens/new_location_screen.dart';
+import 'package:locations/src/screens/new_location_screen_zebra.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
@@ -7,7 +9,6 @@ import './src/providers/auth.dart';
 import './src/providers/connection.dart';
 import './src/screens/home.dart';
 import './src/screens/login.dart';
-import './src/screens/new_location_screen.dart';
 import './src/screens/splash_screen.dart';
 
 void main() async {
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
               Home.routeName: (ctx) => const Home(),
               AuthScreen.routeName: (ctx) => AuthScreen(),
               LocScreen.routeName: (ctx) => LocScreen(),
+              ZebraScreen.routeName: (ctx) => ZebraScreen(),
             },
           ),
         ),
